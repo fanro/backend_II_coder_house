@@ -1,4 +1,5 @@
 import multer from 'multer';
+import bcrypt from 'bcrypt';
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -13,6 +14,8 @@ const storage = multer.diskStorage({
 });
 
 // const uploader = multer({ storage: storage })
-const uploader = multer({ storage });
+export const uploader = multer({ storage });
 
-export { uploader };
+export const generaHash = (password) => bcrypt.hashSync(password, 10);
+
+export const validaPass = (pass, hash) => bcrypt.compareSync(pass, hash);
