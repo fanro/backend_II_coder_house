@@ -3,6 +3,7 @@ import { UserMongoManager } from '../dao/UserMongoManager.js';
 import { validaPass } from '../utils/utils.js';
 import { config } from '../config/config.js';
 import jwt from 'jsonwebtoken';
+import { auth } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -29,6 +30,11 @@ router.post('/login', async (req, res) => {
     console.error('Error al iniciar sesión:', error);
     return res.status(500).send({ error: 'Error interno del servidor' });
   }
+});
+
+router.get('/current', auth, (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  return res.status(200).json({ payload: req.user });
 });
 
 router.get('/logout', (req, res) => {

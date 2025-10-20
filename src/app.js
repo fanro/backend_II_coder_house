@@ -7,6 +7,7 @@ import { engine } from 'express-handlebars';
 import { Server } from 'socket.io';
 import { iniciarPassport } from './config/passport.config.js';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 
 // Importar router principal
 import apiRouter from './routes/apiIndex.js';
@@ -25,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(logger);
 iniciarPassport();
 app.use(passport.initialize());
+app.use(cookieParser());
 
 // Configurar Handlebars con helpers personalizados
 app.engine(
