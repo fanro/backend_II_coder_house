@@ -1,0 +1,467 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - E-commerce</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .products-count {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .products-count strong {
+            color: #495057;
+        }
+
+        .products-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .limit-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .limit-selector label {
+            color: #495057;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .limit-selector select {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            color: #495057;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .limit-selector select:hover {
+            border-color: #4facfe;
+        }
+
+        .limit-selector select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            justify-items: center;
+        }
+
+        /* Para pantallas grandes, forzar 5 columnas (ideal para 10 productos) */
+        @media (min-width: 1400px) {
+            .products-grid {
+                grid-template-columns: repeat(5, 1fr);
+                max-width: 1400px;
+                margin: 0 auto 40px auto;
+            }
+        }
+
+        /* Para pantallas medianas, usar 4 columnas */
+        @media (min-width: 1100px) and (max-width: 1399px) {
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Para tablets, usar 3 columnas */
+        @media (min-width: 800px) and (max-width: 1099px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Para tablets pequeñas, usar 2 columnas */
+        @media (min-width: 600px) and (max-width: 799px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #e1e5e9;
+            overflow: hidden;
+            width: 100%;
+            max-width: 280px;
+            height: fit-content;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card-body {
+            padding: 20px;
+        }
+
+        .product-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .product-description {
+            color: #6c757d;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #28a745;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-products-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #dee2e6;
+        }
+
+        .no-products h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        /* Paginación */
+        .pagination-container {
+            margin-top: 40px;
+            border-top: 1px solid #e1e5e9;
+            padding-top: 30px;
+        }
+
+        .pagination-info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 10px 16px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            color: #495057;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        .pagination-btn:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            transform: translateY(-1px);
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-color: #4facfe;
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .pagination-btn.prev,
+        .pagination-btn.next {
+            font-weight: 600;
+            padding: 10px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px;
+            }
+            
+            .products-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .products-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .limit-selector {
+                flex-direction: column;
+                gap: 5px;
+                align-items: flex-start;
+            }
+
+            .limit-selector select {
+                width: 100%;
+                min-width: 120px;
+            }
+
+            .products-header h2 {
+                font-size: 1.3rem !important;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .pagination {
+                gap: 5px;
+            }
+            
+            .pagination-btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .product-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div class="content">
+            {{#if productos}}
+                <div class="products-header">
+                    <div>
+                        <h2 style="color: #495057; margin: 0; font-size: 1.5rem;">🛍️ Productos Disponibles</h2>
+                        <div class="products-count">
+                            Mostrando <strong>{{productos.length}}</strong> de <strong>{{totalDocs}}</strong> productos
+                        </div>
+                    </div>
+                    
+                    <div class="products-controls">
+                        <div class="limit-selector">
+                            <label for="limitSelect">Productos por página:</label>
+                            <select id="limitSelect" onchange="changeLimit(this.value)">
+                                {{#each limitOptions}}
+                                    <option value="{{this}}" {{#if (eq this ../limit)}}selected{{/if}}>{{this}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="products-grid">
+                    {{#each productos}}
+                        <div class="product-card">
+                            <div class="product-card-body">
+                                <h3 class="product-title">{{title}}</h3>
+                                <p class="product-description">{{description}}</p>
+                                <div class="product-price">${{price}}</div>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+
+                <!-- Paginación -->
+                {{#if totalPages}}
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Página <strong>{{page}}</strong> de <strong>{{totalPages}}</strong>
+                        </div>
+                        
+                        <div class="pagination">
+                            <!-- Botón Anterior -->
+                            {{#if hasPrevPage}}
+                                <a href="?page={{prevPage}}&limit={{limit}}" class="pagination-btn prev">
+                                    ← Anterior
+                                </a>
+                            {{else}}
+                                <span class="pagination-btn prev disabled">
+                                    ← Anterior
+                                </span>
+                            {{/if}}
+
+                            <!-- Primera página -->
+                            {{#if (eq page 1)}}
+                                <span class="pagination-btn active">1</span>
+                            {{else}}
+                                <a href="?page=1&limit={{limit}}" class="pagination-btn">1</a>
+                            {{/if}}
+
+                            <!-- Puntos suspensivos izquierdos -->
+                            {{#if hasPrevPage}}
+                                {{#unless (eq prevPage 1)}}
+                                    <span class="pagination-btn disabled">...</span>
+                                {{/unless}}
+                                
+                                <!-- Página anterior si no es la primera -->
+                                {{#unless (eq prevPage 1)}}
+                                    <a href="?page={{prevPage}}&limit={{limit}}" class="pagination-btn">{{prevPage}}</a>
+                                {{/unless}}
+                            {{/if}}
+
+                            <!-- Página actual si no es la primera ni la última -->
+                            {{#unless (eq page 1)}}
+                                {{#unless (eq page totalPages)}}
+                                    <span class="pagination-btn active">{{page}}</span>
+                                {{/unless}}
+                            {{/unless}}
+
+                            <!-- Página siguiente si no es la última -->
+                            {{#if hasNextPage}}
+                                {{#unless (eq nextPage totalPages)}}
+                                    <a href="?page={{nextPage}}&limit={{limit}}" class="pagination-btn">{{nextPage}}</a>
+                                {{/unless}}
+                                
+                                <!-- Puntos suspensivos derechos -->
+                                {{#unless (eq nextPage totalPages)}}
+                                    <span class="pagination-btn disabled">...</span>
+                                {{/unless}}
+                            {{/if}}
+
+                            <!-- Última página si no es la primera ni la actual -->
+                            {{#unless (eq totalPages 1)}}
+                                {{#unless (eq page 1)}}
+                                    {{#if (eq page totalPages)}}
+                                        <span class="pagination-btn active">{{totalPages}}</span>
+                                    {{else}}
+                                        <a href="?page={{totalPages}}&limit={{limit}}" class="pagination-btn">{{totalPages}}</a>
+                                    {{/if}}
+                                {{/unless}}
+                            {{/unless}}
+
+                            <!-- Botón Siguiente -->
+                            {{#if hasNextPage}}
+                                <a href="?page={{nextPage}}&limit={{limit}}" class="pagination-btn next">
+                                    Siguiente →
+                                </a>
+                            {{else}}
+                                <span class="pagination-btn next disabled">
+                                    Siguiente →
+                                </span>
+                            {{/if}}
+                        </div>
+                    </div>
+                {{/if}}
+            {{else}}
+                <div class="no-products">
+                    <div class="no-products-icon">📦</div>
+                    <h3>No hay productos disponibles</h3>
+                    <p>En este momento no tenemos productos para mostrar. ¡Vuelve pronto!</p>
+                </div>
+            {{/if}}
+        </div>
+    </div>
+    
+    <script>
+        function changeLimit(newLimit) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('limit', newLimit);
+            urlParams.set('page', '1'); // Resetear a la primera página al cambiar el límite
+            window.location.search = urlParams.toString();
+        }
+    </script>
+</body>
+</html>

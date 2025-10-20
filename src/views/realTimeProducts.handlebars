@@ -1,0 +1,32 @@
+<div class="container">
+    <header class="header">
+        <h1>Productos en Tiempo Real</h1>
+        <div class="fecha" id="fecha"></div>
+    </header>
+    
+    <main class="content">
+        <ul id="productos" class="products-grid">
+            {{#if productos}}
+                {{#each productos}}
+                    <li class="product-card" data-id="{{_id}}">
+                        <h3 class="product-title">{{title}}</h3>
+                        <p class="product-description">{{description}}</p>
+                        <div class="product-price">
+                            <span class="price-label">Precio:</span>
+                            <span class="price-value">${{price}}</span>
+                        </div>
+                    </li>
+                {{/each}}
+            {{else}}
+                <div class="empty-state">
+                    <div class="icon">📦</div>
+                    <h3>No hay productos disponibles</h3>
+                    <p>Los productos aparecerán aquí en tiempo real</p>
+                </div>
+            {{/if}}
+        </ul>
+    </main>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/rtp.js"></script>

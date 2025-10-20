@@ -1,0 +1,24 @@
+[
+     {
+          "id": 1,
+          "title": "Remera Adidas",
+          "description": "Remera deportiva Adidas para hombre",
+          "code": "P001",
+          "price": 100,
+          "status": true,
+          "stock": 50,
+          "category": "Indumentaria",
+          "thumbnails": ["url_imagen_1", "url_imagen_2"]
+     },
+     {
+          "id": 2,
+          "title": "Televisor Samsung",
+          "description": "Televisor Samsung de 55 pulgadas",
+          "code": "P002",
+          "price": 200,
+          "status": true,
+          "stock": 30,
+          "category": "Electrodomésticos",
+          "thumbnails": ["url_imagen_3", "url_imagen_4"]
+     }
+]
