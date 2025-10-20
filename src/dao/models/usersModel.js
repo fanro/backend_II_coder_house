@@ -27,7 +27,4 @@ const schemaUser = new mongoose.Schema(
 );
 
 schemaUser.plugin(paginate);
-
-const User = mongoose.model('User', schemaUser);
-
-export default User;
+export const usersModel = mongoose.model('users', schemaUser);
