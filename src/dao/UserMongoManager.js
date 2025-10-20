@@ -8,6 +8,10 @@ export class UserMongoManager {
     return await usersModel.findById(id).lean();
   }
 
+  static async getUserFiltro(filtro) {
+    return await usersModel.findOne(filtro).lean();
+  }
+
   static async createUser(userData) {
     const newUser = await usersModel.create(userData);
     return newUser;
