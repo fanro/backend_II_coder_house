@@ -55,4 +55,42 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.put('/:uid', async (req, res) => {
+  try {
+    const uid = req.params.uid;
+    const userData = req.body;
+
+    // Validar campos requeridos
+    const requiredFields = ['first_name', 'last_name', 'email', 'age'];
+    for (const field of requiredFields) {
+      if (!userData[field]) {
+        return res.status(400).json({ error: `Falta el campo ${field}` });
+      }
+    }
+
+    const updatedUser = await UserMongoManager.updateUser(uid, userData);
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    res.status(500).json({ error: 'Error al actualizar usuario' });
+  }
+});
+
+router.delete('/:uid', async (req, res) => {
+  try {
+    const uid = req.params.uid;
+    const deletedUser = await UserMongoManager.deleteUser(uid);
+    if (!deletedUser) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json({ message: 'Usuario eliminado' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ error: 'Error al eliminar usuario' });
+  }
+});
+
 export default router;
