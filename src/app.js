@@ -5,6 +5,8 @@ import { CartManager } from './dao/CartManager.js';
 import { logger } from './middlewares/logger.js';
 import { engine } from 'express-handlebars';
 import { Server } from 'socket.io';
+import { iniciarPassport } from './config/passport.config.js';
+import passport from 'passport';
 
 // Importar router principal
 import apiRouter from './routes/apiIndex.js';
@@ -21,6 +23,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(logger);
+iniciarPassport();
+app.use(passport.initialize());
 
 // Configurar Handlebars con helpers personalizados
 app.engine(
