@@ -58,7 +58,7 @@ app.set('views', './src/views');
 app.use(express.static('./src/public'));
 
 const server = app.listen(PORT, () => {
-  console.log(`Server on line en pueto ${PORT}`);
+  console.log(`Server on line en puerto ${PORT}`);
 });
 
 conectarDB(config.MONGO_URL, config.DB_NAME);
