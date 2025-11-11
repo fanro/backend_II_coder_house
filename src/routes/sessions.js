@@ -1,7 +1,6 @@
 import express from 'express';
 import { config } from '../config/config.js';
 import jwt from 'jsonwebtoken';
-import { auth } from '../middlewares/auth.js';
 import passport from 'passport';
 
 const router = express.Router();
