@@ -1,6 +1,4 @@
 import express from 'express';
-import { UserMongoManager } from '../dao/UserMongoManager.js';
-import { validaPass } from '../utils/utils.js';
 import { config } from '../config/config.js';
 import jwt from 'jsonwebtoken';
 import { auth } from '../middlewares/auth.js';
@@ -13,7 +11,7 @@ router.post('/register', (req, res, next) => {
     if (err) {
       return res
         .status(500)
-        .json({ error: err.message || 'Error interno del servidor' });
+        .json({ error: info?.message || 'Error interno del servidor' });
     }
 
     if (!user) {
@@ -27,29 +25,39 @@ router.post('/register', (req, res, next) => {
   })(req, res, next);
 });
 
-router.post('/login', async (req, res) => {
-  let { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).send({ error: 'Ingrese email y password' });
+router.post('/login', (req, res, next) => {
+  passport.authenticate('login', { session: false }, (err, user, info) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ error: info?.message || 'Error interno del servidor' });
+    }
 
-  try {
-    const usuario = await UserMongoManager.getUserFiltro({ email });
+    if (!user)
+      return res
+        .status(401)
+        .json({ status: 'error', message: info?.message || 'No autorizado' });
 
-    if (!validaPass(password, usuario.password))
-      return res.status(401).send({ error: `Error credenciales` });
+    const payload = {
+      sub: user._id,
+      email: user.email,
+      role: user.role,
+    };
+    const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: '1h' });
 
-    delete usuario.password; // eliminar datos sensibles
-    let token = jwt.sign(usuario, config.JWT_SECRET, { expiresIn: '1h' });
-
-    res.cookie('tokenCookie', token, { httpOnly: true });
-    return res.status(200).json({
-      usuarioLogueado: usuario,
-      // token
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: false,
+      maxAge: 3600000,
     });
-  } catch (error) {
-    console.error('Error al iniciar sesión:', error);
-    return res.status(500).send({ error: 'Error interno del servidor' });
-  }
+
+    const { password, ...userSafe } = user;
+    res.json({
+      status: 'success',
+      message: 'Login exitoso',
+      user: userSafe,
+    });
+  })(req, res, next);
 });
 
 router.get('/current', auth, (req, res) => {

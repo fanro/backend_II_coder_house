@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import { config } from './config.js';
 import { UserMongoManager } from '../dao/UserMongoManager.js';
 import { CartMongoManager } from '../dao/CartMongoManager.js';
+import { validaPass } from '../utils/utils.js';
 
 const buscaToken = (req) => {
   let token = null;
@@ -56,6 +57,37 @@ export const iniciarPassport = () => {
           });
 
           return done(null, newUser);
+        } catch (err) {
+          return done(err);
+        }
+      }
+    )
+  );
+
+  passport.use(
+    'login',
+    new passportLocal.Strategy(
+      {
+        usernameField: 'email',
+        passwordField: 'password',
+        passReqToCallback: true,
+      },
+      async (req, email, password, done) => {
+        try {
+          if (!email || !password) {
+            return done(null, false, { message: 'Credenciales incompletas' });
+          }
+
+          const user = await UserMongoManager.getUserFiltro({ email });
+          if (!user) {
+            return done(null, false, { message: 'Usuario no encontrado' });
+          }
+
+          if (!validaPass(password, user.password)) {
+            return done(null, false, { message: 'Contraseña inválida' });
+          }
+
+          return done(null, user);
         } catch (err) {
           return done(err);
         }
