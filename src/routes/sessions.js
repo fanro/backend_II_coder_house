@@ -60,13 +60,17 @@ router.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
-router.get('/current', auth, (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  return res.status(200).json({ payload: req.user });
-});
+router.get(
+  '/current',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).json({ payload: req.user });
+  }
+);
 
 router.get('/logout', (req, res) => {
-  res.clearCookie('tokenCookie');
+  res.clearCookie('jwt');
   return res.status(200).json({ message: 'Usuario deslogueado' });
 });
 

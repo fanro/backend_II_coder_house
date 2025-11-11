@@ -10,8 +10,8 @@ import { validaPass } from '../utils/utils.js';
 const buscaToken = (req) => {
   let token = null;
 
-  if (req.cookies.tokenCookie) {
-    token = req.cookies.tokenCookie;
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   return token;
@@ -96,15 +96,21 @@ export const iniciarPassport = () => {
   );
 
   passport.use(
-    'current',
+    'jwt',
     new passportJWT.Strategy(
       {
         secretOrKey: config.JWT_SECRET,
         jwtFromRequest: passportJWT.ExtractJwt.fromExtractors([buscaToken]),
       },
-      async (contenidoToken, done) => {
+      async (jwt_payload, done) => {
         try {
-          return done(null, contenidoToken);
+          const user = await UserMongoManager.getUserFiltro({
+            email: jwt_payload.email,
+          });
+          if (!user)
+            return done(null, false, { message: 'Token o usuario inválido' });
+
+          return done(null, user);
         } catch (error) {
           return done(error);
         }
