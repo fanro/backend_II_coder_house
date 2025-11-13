@@ -115,6 +115,13 @@ export const productsController = {
     }
 
     try {
+      let productCode = await ProductsMongoManager.getProductBy({ code });
+      if (productCode) {
+        return res
+          .status(400)
+          .send({ error: 'Ya existe un producto con el code proporcionado' });
+      }
+
       let nuevoProducto = await ProductsMongoManager.createProduct({
         title,
         description,

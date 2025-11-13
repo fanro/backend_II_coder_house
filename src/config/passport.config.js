@@ -79,12 +79,10 @@ export const iniciarPassport = () => {
           }
 
           const user = await UserMongoManager.getUserFiltro({ email });
-          if (!user) {
-            return done(null, false, { message: 'Usuario no encontrado' });
-          }
-
-          if (!validaPass(password, user.password)) {
-            return done(null, false, { message: 'Contraseña inválida' });
+          if (!user || !validaPass(password, user.password)) {
+            return done(null, false, {
+              message: 'Usuario y/o contraseña inválidos',
+            });
           }
 
           return done(null, user);
