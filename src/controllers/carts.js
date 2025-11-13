@@ -89,4 +89,29 @@ export const cartsController = {
       return res.status(400).send({ error: error.message });
     }
   },
+
+  purchaseCart: async (req, res) => {
+    const { cid } = req.params;
+    try {
+      const { totalAmount, productsPurchased, outOfStock } =
+        await CartMongoManager.purchaseCart(cid);
+
+      let message = '';
+      if (productsPurchased.length > 0) {
+        message += `Compra realizada con éxito. Monto total: $${totalAmount}. Productos comprados: ${productsPurchased
+          .map((p) => p.title)
+          .join(', ')}. `;
+      }
+
+      if (outOfStock.length > 0) {
+        message += `Los siguientes productos están fuera de stock o no tienen suficiente cantidad: ${outOfStock
+          .map((p) => p.title)
+          .join(', ')}.`;
+      }
+
+      res.status(200).send({ message });
+    } catch (error) {
+      return res.status(500).send({ error: error.message });
+    }
+  },
 };

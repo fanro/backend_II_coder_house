@@ -1,5 +1,5 @@
 import { cartsModel } from './models/cartsModel.js';
-import { productsModel } from './models/productsModel.js';
+import { ProductsMongoManager } from './ProductMongoManager.js';
 
 class CartMongoManager {
   static async getCarts() {
@@ -21,7 +21,7 @@ class CartMongoManager {
       throw new Error('Carrito no encontrado');
     }
 
-    let product = await productsModel.findById(pid);
+    let product = await ProductsMongoManager.getProductById(pid);
     if (!product) {
       throw new Error('Producto no encontrado');
     }
@@ -42,7 +42,7 @@ class CartMongoManager {
       throw new Error('Carrito no encontrado');
     }
 
-    let product = await productsModel.findById(pid);
+    let product = await ProductsMongoManager.getProductById(pid);
     if (!product) {
       throw new Error('Producto no encontrado');
     }
@@ -79,6 +79,64 @@ class CartMongoManager {
     });
     await cartsModel.findByIdAndUpdate(cid, cart);
     return cart;
+  }
+
+  static async purchaseCart(cid) {
+    let cart = await cartsModel.findById(cid).populate('products.product');
+    if (!cart) {
+      throw new Error('Carrito no encontrado');
+    }
+
+    try {
+      // validar total disponibilidad de stock
+      let outOfStock = [];
+      let totalAmount = 0;
+      let productsPurchased = [];
+      for (let item of cart.products) {
+        if (item.quantity > item.product.stock) {
+          outOfStock.push({
+            product: item.product._id,
+            title: item.product.title,
+          });
+        } else {
+          totalAmount += item.quantity * item.product.price;
+          productsPurchased.push({
+            title: item.product.title,
+            product: item.product._id,
+            quantity: item.quantity,
+            price: item.product.price,
+          });
+          // actualizar stock del producto
+          await ProductsMongoManager.updateProduct(
+            item.product._id,
+            { $inc: { stock: -item.quantity } },
+            { new: true }
+          );
+        }
+      }
+
+      // elimino productos comprados del carrito
+      cart.products = cart.products.filter((item) =>
+        outOfStock.some(
+          (p) => p.product.toString() === item.product._id.toString()
+        )
+      );
+      await cartsModel.findByIdAndUpdate(cid, cart);
+
+      if (productsPurchased.length > 0) {
+        //crear ticket de compra
+        // await ticketModel.create({
+        //   code: generateTicketCode(),
+        //   purchase_datetime: new Date(),
+        //   amount: totalAmount,
+        //   purchaser: purchaserEmail,
+        // });
+      }
+
+      return { totalAmount, productsPurchased, outOfStock };
+    } catch (error) {
+      throw new Error('Error al procesar la compra: ' + error.message);
+    }
   }
 }
 
