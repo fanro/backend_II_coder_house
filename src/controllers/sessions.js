@@ -1,6 +1,7 @@
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/config.js';
+import { UserDto } from '../dto/user.js';
 
 export const sessionsController = {
   login: (req, res, next) => {
@@ -30,11 +31,10 @@ export const sessionsController = {
         maxAge: 3600000,
       });
 
-      const { password, ...userSafe } = user;
       res.json({
         status: 'success',
         message: 'Login exitoso',
-        user: userSafe,
+        user: UserDto.response(user),
       });
     })(req, res, next);
   },
@@ -53,8 +53,9 @@ export const sessionsController = {
           .json({ error: info.message || 'Error en el registro' });
       }
 
-      const { password, ...userSafe } = user.toObject();
-      res.status(201).json({ message: 'Usuario registrado', user: userSafe });
+      res
+        .status(201)
+        .json({ message: 'Usuario registrado', user: UserDto.response(user) });
     })(req, res, next);
   },
 
@@ -62,7 +63,7 @@ export const sessionsController = {
     passport.authenticate('jwt', { session: false }),
     (req, res) => {
       res.setHeader('Content-Type', 'application/json');
-      return res.status(200).json({ payload: req.user });
+      return res.status(200).json({ payload: UserDto.response(req.user) });
     },
   ],
 
