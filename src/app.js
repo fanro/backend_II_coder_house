@@ -1,10 +1,7 @@
 import express from 'express';
 import { ProductManager } from './dao/ProductManager.js';
-import { ProductsMongoManager } from './dao/ProductMongoManager.js';
 import { CartManager } from './dao/CartManager.js';
 import { logger } from './middlewares/logger.js';
-import { engine } from 'express-handlebars';
-import { Server } from 'socket.io';
 import { iniciarPassport } from './config/passport.config.js';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
@@ -14,6 +11,8 @@ import apiRouter from './routes/apiIndex.js';
 import viewsRouter from './routes/views.js';
 import { conectarDB } from './config/db.js';
 import { config } from './config/config.js';
+import { configurarHandlebars } from './config/handlebars.js';
+import { configurarSocket } from './config/socket.js';
 
 ProductManager.rutaDatos = './src/data/products.json';
 CartManager.rutaDatos = './src/data/carts.json';
@@ -28,33 +27,8 @@ iniciarPassport();
 app.use(passport.initialize());
 app.use(cookieParser());
 
-// Configurar Handlebars con helpers personalizados
-app.engine(
-  'handlebars',
-  engine({
-    helpers: {
-      eq: function (a, b) {
-        return a === b;
-      },
-      range: function (start, end) {
-        const result = [];
-        for (let i = start; i <= end; i++) {
-          result.push(i);
-        }
-        return result;
-      },
-      add: function (a, b) {
-        return a + b;
-      },
-      subtract: function (a, b) {
-        return a - b;
-      },
-    },
-  })
-);
+configurarHandlebars(app);
 
-app.set('view engine', 'handlebars');
-app.set('views', './src/views');
 app.use(express.static('./src/public'));
 
 const server = app.listen(PORT, () => {
@@ -63,23 +37,7 @@ const server = app.listen(PORT, () => {
 
 conectarDB(config.MONGO_URL, config.DB_NAME);
 
-const io = new Server(server);
-
-io.on('connection', async (socket) => {
-  console.log('Cliente conectado:', socket.id);
-
-  // lista actual de productos al cliente que se conecta
-  try {
-    const { docs: productos } = await ProductsMongoManager.getProducts();
-    socket.emit('productos-actualizados', productos);
-  } catch (error) {
-    console.error('Error al cargar productos iniciales:', error);
-  }
-
-  socket.on('disconnect', () => {
-    console.log('Cliente desconectado:', socket.id);
-  });
-});
+const io = configurarSocket(server);
 
 // paso socket.io para usar en rutas
 app.use(
@@ -95,8 +53,3 @@ app.use('/', viewsRouter);
 app.get('/', (req, res) => {
   res.send('Bienvenidos');
 });
-
-setInterval(() => {
-  let fecha = new Date().toISOString();
-  io.emit('fecha', fecha);
-}, 1000);
