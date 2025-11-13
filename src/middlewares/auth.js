@@ -59,5 +59,18 @@ export const validarRoles = (roles) => {
   };
 };
 
+export const validarCarritoUsuario = (req, res, next) => {
+  const user = req.user;
+  const cartId = req.params.cid;
+
+  if (user.role === 'user' && user.cart.toString() !== cartId) {
+    return res.status(403).json({
+      error: 'No tienes permisos para acceder a este carrito',
+    });
+  }
+
+  next();
+};
+
 export const rolAdmin = validarRoles(['admin']);
 export const rolUser = validarRoles(['user', 'admin']);

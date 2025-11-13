@@ -22,6 +22,7 @@ export const sessionsController = {
         sub: user._id,
         email: user.email,
         role: user.role,
+        cart: user.cart,
       };
       const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: '1h' });
 
