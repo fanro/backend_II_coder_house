@@ -1,4 +1,5 @@
 import { cartsModel } from './models/cartsModel.js';
+import { productsModel } from './models/productsModel.js';
 
 class CartMongoManager {
   static async getCarts() {
@@ -19,6 +20,12 @@ class CartMongoManager {
     if (!cart) {
       throw new Error('Carrito no encontrado');
     }
+
+    let product = await productsModel.findById(pid);
+    if (!product) {
+      throw new Error('Producto no encontrado');
+    }
+
     let productInCart = cart.products.find((p) => p.product.toString() === pid);
     if (productInCart) {
       productInCart.quantity += quantity;
@@ -34,6 +41,12 @@ class CartMongoManager {
     if (!cart) {
       throw new Error('Carrito no encontrado');
     }
+
+    let product = await productsModel.findById(pid);
+    if (!product) {
+      throw new Error('Producto no encontrado');
+    }
+
     cart.products = cart.products.filter((p) => p.product.toString() !== pid);
     await cartsModel.findByIdAndUpdate(cid, cart);
     return cart;
