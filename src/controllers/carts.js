@@ -92,9 +92,10 @@ export const cartsController = {
 
   purchaseCart: async (req, res) => {
     const { cid } = req.params;
+    const user = req.user;
     try {
       const { totalAmount, productsPurchased, outOfStock } =
-        await CartMongoManager.purchaseCart(cid);
+        await CartMongoManager.purchaseCart(cid, user);
 
       let message = '';
       if (productsPurchased.length > 0) {

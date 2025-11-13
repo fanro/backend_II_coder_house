@@ -1,5 +1,6 @@
 import { cartsModel } from './models/cartsModel.js';
 import { ProductsMongoManager } from './ProductMongoManager.js';
+import { TicketMongoManager } from './TicketMongoManager.js';
 
 class CartMongoManager {
   static async getCarts() {
@@ -81,7 +82,7 @@ class CartMongoManager {
     return cart;
   }
 
-  static async purchaseCart(cid) {
+  static async purchaseCart(cid, user) {
     let cart = await cartsModel.findById(cid).populate('products.product');
     if (!cart) {
       throw new Error('Carrito no encontrado');
@@ -124,13 +125,12 @@ class CartMongoManager {
       await cartsModel.findByIdAndUpdate(cid, cart);
 
       if (productsPurchased.length > 0) {
-        //crear ticket de compra
-        // await ticketModel.create({
-        //   code: generateTicketCode(),
-        //   purchase_datetime: new Date(),
-        //   amount: totalAmount,
-        //   purchaser: purchaserEmail,
-        // });
+        await TicketMongoManager.createTicket({
+          code: `TICKET-${Date.now()}`,
+          purchase_datetime: new Date(),
+          amount: totalAmount,
+          purchaser: user.email,
+        });
       }
 
       return { totalAmount, productsPurchased, outOfStock };
