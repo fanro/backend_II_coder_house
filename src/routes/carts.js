@@ -1,5 +1,4 @@
 import express from 'express';
-import { CartMongoManager } from '../dao/CartMongoManager.js';
 import { cartsController } from '../controllers/carts.js';
 
 const router = express.Router();
